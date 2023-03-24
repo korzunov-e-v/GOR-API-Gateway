@@ -1,0 +1,20 @@
+stages:
+  - linting
+
+mypy:
+  stage: linting
+  image: python:3.9-slim
+  script:
+    - pip install mypy --quiet
+    - ls -a
+    - mypy --install-types --non-interactive .
+
+flake8:
+  stage: linting
+  image: python:3.9-slim
+  before_script:
+    - pip install flake8
+    - pip install flake8-print
+  script:
+    - flake8
+
