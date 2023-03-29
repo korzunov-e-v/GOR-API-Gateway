@@ -5,6 +5,7 @@ from functools import lru_cache
 from pydantic import BaseSettings
 
 from src.core.settings.uvicorn import UvicornSettings
+from src.core.settings.cors import CORSSettings
 
 
 class RunMode(str, Enum):
@@ -24,6 +25,7 @@ class Settings(BaseSettings):
     app_version: str = "latest"
     project_name: str
     app_slug: str
+    secret_jwt: str
 
     # application run mod: DEV/BACKGROUND
     run_mode: typing.Optional[RunMode] = RunMode.dev
@@ -31,7 +33,7 @@ class Settings(BaseSettings):
     debug: typing.Optional[bool]
 
     uvicorn: UvicornSettings
-
+    cors: CORSSettings = CORSSettings()
 
 @lru_cache
 def get_settings() -> Settings:

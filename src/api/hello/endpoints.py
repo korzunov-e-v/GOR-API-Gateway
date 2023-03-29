@@ -1,43 +1,16 @@
 import json
-import httpx
-from fastapi.routing import APIRoute
-from httpx import AsyncClient
 import requests
 
-from starlette.background import BackgroundTask
-from fastapi import APIRouter, Request
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Request, Depends
+from fastapi.routing import APIRoute
 
-from src.api.hello.schemas import HelloSchema, Service
 from src.core.settings import get_settings
-
+from src.core.handlers import dynamic_handler
+from src.core.dependencies import jwt_validator
+from src.api.hello.schemas import HelloSchema, Service
 
 router = APIRouter()
 settings = get_settings()
-
-HTTP_SERVER = AsyncClient(base_url="http://localhost:8000/")
-
-
-def dynamic_handler(host_port: str):
-    async def _reverse_proxy(request: Request):
-        url = httpx.URL(
-            url=f'{host_port}',
-            path=request.url.path,
-            query=request.url.query.encode("utf-8")
-        )
-        rp_req = HTTP_SERVER.build_request(
-            request.method, url, headers=request.headers.raw,
-            content=await request.body()
-        )
-        rp_resp = await HTTP_SERVER.send(rp_req, stream=True)
-        return StreamingResponse(
-            rp_resp.aiter_raw(),
-            status_code=rp_resp.status_code,
-            headers=rp_resp.headers,
-            background=BackgroundTask(rp_resp.aclose),
-        )
-
-    return _reverse_proxy
 
 
 @router.get(
@@ -84,11 +57,15 @@ async def post_hello(service: Service, request: Request):
     for serv in services:
         host_port = f'http://{serv.ip}:{serv.port}'
         for i, endp in enumerate(serv.endpoints):
+            dependencies = []
+            if endp.protected:
+                dependencies = [Depends(jwt_validator)]
             nested_router.add_api_route(
                 path=f'/{endp.url}',
                 endpoint=dynamic_handler(host_port=host_port),
                 methods=endp.methods,
-                name=f'{serv.label}_{i}'
+                name=f'{serv.label}_{i}',
+                dependencies=dependencies
             )
 
     request.app.include_router(
