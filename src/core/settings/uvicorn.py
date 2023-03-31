@@ -19,3 +19,4 @@ class UvicornSettings(_BaseModel):
     http: HTTPProtocolType = "auto"
     reload: bool = Field(None, description="Enable auto-reload.")
     workers: typing.Optional[int] = None
+    lifespan: str = Field('on', description="Enable startup tasks")
