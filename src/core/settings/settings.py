@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     project_name: str
     app_slug: str
     secret_jwt: str
+    logging_level: str
 
     # application run mod: DEV/BACKGROUND
     run_mode: typing.Optional[RunMode] = RunMode.dev
