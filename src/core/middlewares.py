@@ -22,6 +22,7 @@ class RequestIDMiddleware:
     async def __call__(self, scope, receive, send):
         headers = scope.get('headers')
         if headers:
+            headers = dict(headers)
             headers[b"x-request-id"] = str(uuid.uuid4()).encode()
             scope["headers"] = [(k, v) for k, v in headers.items()]
         await self.app(scope, receive, send)
@@ -30,7 +31,6 @@ class RequestIDMiddleware:
 class RequestLogMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):
         super().__init__(app)
-        # self.some_attribute = some_attribute
 
     async def set_body(self, request: Request):
         receive_ = await request._receive()
