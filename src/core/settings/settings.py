@@ -4,13 +4,13 @@ from functools import lru_cache
 
 from pydantic import BaseSettings
 
-from src.core.settings.uvicorn import UvicornSettings
 from src.core.settings.cors import CORSSettings
+from src.core.settings.uvicorn import UvicornSettings
 
 
 class RunMode(str, Enum):
-    background = 'BACKGROUND'
-    dev = 'DEV'
+    background = "BACKGROUND"
+    dev = "DEV"
 
 
 class Settings(BaseSettings):
@@ -35,6 +35,7 @@ class Settings(BaseSettings):
 
     uvicorn: UvicornSettings
     cors: CORSSettings = CORSSettings()
+
 
 @lru_cache
 def get_settings() -> Settings:

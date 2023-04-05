@@ -1,10 +1,8 @@
 import typing
 
 from pydantic import Field
-from uvicorn.config import (
-    HTTPProtocolType,
-    LoopSetupType,
-)
+from uvicorn.config import HTTPProtocolType
+from uvicorn.config import LoopSetupType
 
 from src.core.settings.base import _BaseModel
 
@@ -19,4 +17,4 @@ class UvicornSettings(_BaseModel):
     http: HTTPProtocolType = "auto"
     reload: bool = Field(None, description="Enable auto-reload.")
     workers: typing.Optional[int] = None
-    lifespan: str = Field('on', description="Enable startup tasks")
+    lifespan: str = Field("on", description="Enable startup tasks")

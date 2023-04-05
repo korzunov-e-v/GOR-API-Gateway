@@ -1,10 +1,10 @@
 import sys
-import uvicorn
 from pathlib import Path
-from prometheus_fastapi_instrumentator import Instrumentator
 
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # This path was added to solve some problems with absolute
 # imports in order to run this script as an executable file.
@@ -26,7 +26,7 @@ def get_application() -> FastAPI:
         root_path=settings.root_path,
         version=settings.app_version,
         debug=settings.debug,
-        lifespan=lifespan
+        lifespan=lifespan,
     )
 
     _app.state.services = []

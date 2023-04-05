@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  web:
+    image: $APP:$CI_COMMIT_BRANCH
+    container_name: ${APP}
+    build: .
+    restart: always
+    ports:
+      - '9000:9000'
+    env_file: ${ENV_APIGATEWAY}
+    environment:
+      - RUN_MODE=DEV
+    command: >
+      bash -c "python3 src/main.py"

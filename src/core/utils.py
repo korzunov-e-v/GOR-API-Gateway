@@ -1,16 +1,18 @@
 import json
 import logging
+from contextlib import asynccontextmanager
 from typing import List
+
 import logging_json
 import requests
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI, Depends, APIRouter
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import FastAPI
 
 from src.api.hello.schemas import Service
 from src.core import get_settings
-from src.core.handlers import dynamic_handler
 from src.core.dependencies import jwt_validator
+from src.core.handlers import dynamic_handler
 
 settings = get_settings()
 
@@ -21,7 +23,7 @@ def protected_http_method(func):
     be authorized.
 
     """
-    func.__setattr__('protected', True)
+    func.__setattr__("protected", True)
 
     def inner(*args, **kwargs):
         return func(args, kwargs)
@@ -50,7 +52,7 @@ async def lifespan(app: FastAPI):
     app.state.services = []
     saved_services = []
     services: List[Service] = []
-    with open('services.json', 'r') as file:
+    with open("services.json", "r") as file:
         data = file.read()
         if data:
             data_dict = json.loads(data)
@@ -60,31 +62,30 @@ async def lifespan(app: FastAPI):
 
     nested_router = APIRouter()
     for serv in saved_services:
-        url = f'http://{serv.ip}:{serv.port}' \
-              f'{settings.api_prefix}/endpoint-info/'
+        url = (
+            f"http://{serv.ip}:{serv.port}"
+            f"{settings.api_prefix}/endpoint-info/"
+        )
         try:
             resp = requests.get(url=url)
         except requests.exceptions.ConnectionError:
-            logger.info(f'lifespan: Connection failed with {serv.label}')
+            logger.info(f"lifespan: Connection failed with {serv.label}")
             continue
         resp_service = Service(**resp.json())
 
-        host_port = f'http://{resp_service.ip}:{resp_service.port}'
-        for i, endp in enumerate(serv.endpoints):   # type: ignore
+        host_port = f"http://{resp_service.ip}:{resp_service.port}"
+        for i, endp in enumerate(serv.endpoints):  # type: ignore
             dependencies = []
             if endp.protected:
                 dependencies = [Depends(jwt_validator)]
             nested_router.add_api_route(
-                path=f'/{endp.url}',
+                path=f"/{endp.url}",
                 endpoint=dynamic_handler(host_port=host_port),
                 methods=endp.methods,
-                name=f'{serv.label}_{i}',
-                dependencies=dependencies
+                name=f"{serv.label}_{i}",
+                dependencies=dependencies,
             )
 
-    app.include_router(
-        nested_router,
-        prefix=settings.api_prefix
-    )
+    app.include_router(nested_router, prefix=settings.api_prefix)
     app.state.services = services
     yield

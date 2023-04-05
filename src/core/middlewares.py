@@ -1,9 +1,9 @@
-import uuid
 import datetime
 import json
 import logging
 import socket
 import time
+import uuid
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -20,7 +20,7 @@ class RequestIDMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        headers = scope.get('headers')
+        headers = scope.get("headers")
         if headers:
             headers = dict(headers)
             headers[b"x-request-id"] = str(uuid.uuid4()).encode()
@@ -59,11 +59,7 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
         body = await request.body()
 
         if "/api/" in str(request.url.path):
-            req_body = (
-                json.loads(body.decode("utf-8"))
-                if body
-                else {}
-            )
+            req_body = json.loads(body.decode("utf-8")) if body else {}
             log_data["request_body"] = req_body
 
         response = await call_next(request)
