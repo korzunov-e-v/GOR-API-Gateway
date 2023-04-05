@@ -17,6 +17,7 @@ idna==3.4
 iniconfig==2.0.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
+logging-json==0.4.0
 MarkupSafe==2.1.2
 mccabe==0.7.0
 mypy==1.1.1
@@ -24,6 +25,8 @@ mypy-extensions==1.0.0
 orjson==3.8.8
 packaging==23.0
 pluggy==1.0.0
+prometheus-client==0.16.0
+prometheus-fastapi-instrumentator==6.0.0
 pycodestyle==2.10.0
 pydantic==1.10.6
 pyflakes==3.0.1

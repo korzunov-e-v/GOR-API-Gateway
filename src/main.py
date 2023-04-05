@@ -1,6 +1,7 @@
 import sys
 import uvicorn
 from pathlib import Path
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -43,6 +44,7 @@ def get_application() -> FastAPI:
 
 
 app = get_application()
+Instrumentator().instrument(app).expose(app)
 
 
 def main():
