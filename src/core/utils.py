@@ -52,7 +52,7 @@ async def lifespan(app: FastAPI):
     app.state.services = []
     saved_services = []
     services: List[Service] = []
-    with open("services.json", "w") as file:
+    with open("services.json", "w+") as file:
         data = file.read()
         if data:
             data_dict = json.loads(data)
