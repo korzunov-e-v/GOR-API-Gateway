@@ -1,0 +1,44 @@
+[
+    {
+        "name": "user",
+        "port": "9001",
+        "ip": "127.0.0.1",
+        "label": "gor-userservice-dev",
+        "endpoints": null
+    },
+    {
+        "name": "credit",
+        "port": "9002",
+        "ip": "127.0.0.1",
+        "label": "gor-credit",
+        "endpoints": null
+    },
+    {
+        "name": "deposit",
+        "port": "9003",
+        "ip": "127.0.0.1",
+        "label": "gor-deposit",
+        "endpoints": null
+    },
+    {
+        "name": "transfer",
+        "port": "9004",
+        "ip": "127.0.0.1",
+        "label": "gor-moneytransfer",
+        "endpoints": null
+    },
+    {
+        "name": "info",
+        "port": "9005",
+        "ip": "127.0.0.1",
+        "label": "gor-info",
+        "endpoints": null
+    },
+    {
+        "name": "cards",
+        "port": "9006",
+        "ip": "127.0.0.1",
+        "label": "gor-cards",
+        "endpoints": null
+    }
+]

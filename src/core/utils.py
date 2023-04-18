@@ -1,7 +1,7 @@
 import json
 import logging
-from contextlib import asynccontextmanager
 from typing import List
+from typing import Union
 
 import logging_json
 import requests
@@ -31,7 +31,7 @@ def protected_http_method(func):
     return inner
 
 
-def get_logger(level: str | int) -> logging.Logger:
+def get_logger(level: Union[str, int]) -> logging.Logger:
     """
     Creates a JSON format Logger according to the Settings
     """
@@ -45,47 +45,83 @@ def get_logger(level: str | int) -> logging.Logger:
     return middleware_logger
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
+def read_default_services() -> List[Service]:
+    """
+    Reads services from services_default.json
+    """
+    default_services: List[Service] = []
+    with open("services_default.json", "r", encoding="utf-8") as file:
+        data_dict = json.load(file)
+        for serv_dict in data_dict:
+            service = Service(**serv_dict)
+            default_services.append(service)
+    return default_services
+
+
+def get_service_endpoints(service: Service) -> Union[Service, None]:
+    """
+    Get service with endpoints from service without endpoints
+    """
     logger = get_logger(settings.logging_level)
-
-    app.state.services = []
-    saved_services = []
-    services: List[Service] = []
-    with open("services.json", "w+") as file:
-        data = file.read()
-        if data:
-            data_dict = json.loads(data)
-            for serv_dict in data_dict:
-                service = Service(**serv_dict)
-                saved_services.append(service)
-
-    nested_router = APIRouter()
-    for serv in saved_services:
-        url = (
-            f"http://{serv.ip}:{serv.port}"
-            f"{settings.api_prefix}/endpoint-info/"
+    url = (
+        f"http://{service.label}:{service.port}"
+        f"{settings.api_prefix}/endpoint-info/"
+    )
+    try:
+        resp = requests.get(url=url)
+    except requests.exceptions.ConnectionError:
+        logger.warning(
+            f"lifespan: WARNING: Connection failed with {service.label}"
         )
-        try:
-            resp = requests.get(url=url)
-        except requests.exceptions.ConnectionError:
-            logger.info(f"lifespan: Connection failed with {serv.label}")
-            continue
-        resp_service = Service(**resp.json())
+        return None
+    logger.info(f"lifespan: OK: Response from {service.label}")
+    try:
+        resp_json = resp.json()
+    except requests.exceptions.JSONDecodeError:
+        logger.warning(
+            f"lifespan: WARNING: Service {service.label} returned bad response"
+        )
+        return None
+    return Service(**resp_json)
 
-        host_port = f"http://{resp_service.ip}:{resp_service.port}"
-        for i, endp in enumerate(serv.endpoints):  # type: ignore
-            dependencies = []
-            if endp.protected:
-                dependencies = [Depends(jwt_validator)]
-            nested_router.add_api_route(
-                path=f"/{endp.url}",
-                endpoint=dynamic_handler(host_port=host_port),
-                methods=endp.methods,
-                name=f"{serv.label}_{i}",
-                dependencies=dependencies,
-            )
 
-    app.include_router(nested_router, prefix=settings.api_prefix)
-    app.state.services = services
-    yield
+def create_router_from_service(service: Service) -> APIRouter:
+    """
+    Creates and return router from endpoints of service
+    """
+    nested_router = APIRouter()
+    host_port = f"http://{service.label}:{service.port}"
+    for i, endp in enumerate(service.endpoints):  # type: ignore
+        dependencies = []
+        if endp.protected:
+            dependencies = [Depends(jwt_validator)]
+        nested_router.add_api_route(
+            path=f"/{endp.url}",
+            endpoint=dynamic_handler(host_port=host_port),
+            methods=endp.methods,
+            name=f"service_{service.label}_{i}",
+            dependencies=dependencies,
+        )
+    return nested_router
+
+
+def write_services_to_file(services: List[Service]):
+    """
+    Write all services to a file services.json (for debug)
+    """
+    services_json = []
+    for serv in services:
+        serv_json = json.dumps(serv.__dict__, default=lambda o: o.__dict__)
+        services_json.append(json.loads(serv_json))
+
+    with open("services.json", "w", encoding="utf-8") as file:
+        file.write(json.dumps(services_json, indent=4))
+
+
+def clear_app_routes(app: FastAPI):
+    """
+    Clear all app routes except built-in
+    """
+    for i, route in reversed(list(enumerate(app.routes))):
+        if "service" in route.name:
+            del app.routes[i]

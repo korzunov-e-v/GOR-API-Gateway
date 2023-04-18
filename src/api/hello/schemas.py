@@ -12,7 +12,7 @@ class HelloSchema(BaseModel):
 class Endpoint(BaseModel):
     url: str
     protected: bool
-    methods: List[str]
+    methods: Union[List[str], None]
 
 
 class Service(BaseModel):
