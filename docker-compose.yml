@@ -8,6 +8,12 @@ services:
     restart: always
     ports:
       - '9000:9000'
+    logging:
+      driver: fluentd
+      options:
+        tag: ${APP}
+        fluentd-address: localhost:24224
+    restart: always
     env_file: ${ENV_APIGATEWAY}
     environment:
       - RUN_MODE=DEV

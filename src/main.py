@@ -10,8 +10,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
 # imports in order to run this script as an executable file.
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.core import RunMode, get_settings
-from src.core.utils import lifespan
+from src.core import get_settings
+from src.core.lifespan import lifespan
 from src.api.routers import routers
 from src.core.middlewares import RequestIDMiddleware, RequestLogMiddleware
 

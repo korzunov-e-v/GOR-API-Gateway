@@ -59,8 +59,13 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
         body = await request.body()
 
         if "/api/" in str(request.url.path):
-            req_body = json.loads(body.decode("utf-8")) if body else {}
-            log_data["request_body"] = req_body
+            try:
+                req_body = json.loads(body.decode("utf-8")) if body else {}
+                log_data["request_body"] = req_body
+            except json.JSONDecodeError:
+                log.warning("RequestLogMiddleware: WARNING: cant decode body")
+                log.warning(f"RequestLogMiddleware: WARNING: body: {body}")
+                log_data["request_body"] = {body}
 
         response = await call_next(request)
 
