@@ -4,7 +4,10 @@ from src.core.settings.base import _BaseModel
 
 
 class CORSSettings(_BaseModel):
-    allow_origins: list[str] = ["172.17.1.8:8080", "172.17.1.19:8080"]
+    allow_origins: list[str] = [
+        "http://172.17.1.8:8080",
+        "http://172.17.1.19:8080",
+    ]
     allow_credentials: bool | None = True
     allow_methods: list[str] = [
         "GET",
