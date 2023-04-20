@@ -1,6 +1,8 @@
 from datetime import datetime
 
 import jwt
+import pytz
+from dateutil.parser import parse
 from fastapi import HTTPException
 from fastapi import Request
 from starlette.datastructures import MutableHeaders
@@ -21,8 +23,8 @@ async def jwt_validator(request: Request):
         )
     except jwt.InvalidTokenError:
         raise HTTPException(401, "invalid token")
-    exp_at = datetime.fromisoformat(jwt_parsed["expiredAt"][:-4])
-    if exp_at < datetime.utcnow():
+    exp_at = parse(jwt_parsed["expiredAt"])
+    if exp_at < datetime.now(tz=pytz.utc):
         raise HTTPException(401, "token expired")
     client_id = jwt_parsed["clientId"]
     new_header = MutableHeaders(request._headers)

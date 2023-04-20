@@ -40,5 +40,5 @@ repos:
     rev: v1.0.0
     hooks:
     -   id: mypy
-        additional_dependencies: ['types-requests']
+        additional_dependencies: ['types-requests', 'types-pytz', 'types-python-dateutil']
         args: ["--ignore-missing-imports", "--no-namespace-packages", "--config-file=mypy.ini"]
