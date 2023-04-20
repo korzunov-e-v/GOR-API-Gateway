@@ -8,6 +8,7 @@ from src.core import get_settings
 from src.core.utils import create_router_from_service
 from src.core.utils import get_service_endpoints
 from src.core.utils import read_default_services
+from src.core.utils import write_services_to_file
 
 settings = get_settings()
 
@@ -23,6 +24,7 @@ async def lifespan(app: FastAPI):
             services.append(service)
 
     app.state.services = services
+    write_services_to_file(services)
 
     for serv in services:
         nested_router = create_router_from_service(serv)
