@@ -95,8 +95,12 @@ def create_router_from_service(service: Service) -> APIRouter:
         dependencies = []
         if endp.protected:
             dependencies = [Depends(jwt_validator)]
+        if settings.api_prefix not in endp.url:
+            url = endp.url
+        else:
+            url = endp.url.replace(settings.api_prefix, "")
         nested_router.add_api_route(
-            path=f"/{endp.url}",
+            path=f"/{url}",
             endpoint=dynamic_handler(host_port=host_port),
             methods=endp.methods,
             name=f"service_{service.label}_{i}",
