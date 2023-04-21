@@ -15,13 +15,7 @@ class CORSSettings(_BaseModel):
         "OPTIONS",
         "HEAD",
     ]
-    allow_headers: list[str] = [
-        "Access-Control-Allow-Headers",
-        "Access-Control-Allow-Origin",
-        "Access-Control-Allow-Headers",
-        "Access-Control-Allow-Credentials",
-        "FingerPrint",
-    ]
+    allow_headers: list[str] = ["*"]
 
     @validator(
         "allow_origins",
