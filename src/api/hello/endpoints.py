@@ -27,8 +27,13 @@ async def post_hello(service: Service, request: Request):
     """Get service info"""
     logger = get_logger(settings.logging_level)
     logger.info(f"post_hello: INFO: Connection request from {service.label}")
+
+    if settings.run_mode == "DEV":
+        service_host = service.ip
+    else:
+        service_host = service.label
     url = (
-        f"http://{service.label}:{service.port}"
+        f"http://{service_host}:{service.port}"
         f"{settings.api_prefix}/endpoint-info/"
     )
     try:

@@ -63,8 +63,13 @@ def get_service_endpoints(service: Service) -> Union[Service, None]:
     Get service with endpoints from service without endpoints
     """
     logger = get_logger(settings.logging_level)
+
+    if settings.run_mode == "DEV":
+        service_host = service.ip
+    else:
+        service_host = service.label
     url = (
-        f"http://{service.label}:{service.port}"
+        f"http://{service_host}:{service.port}"
         f"{settings.api_prefix}/endpoint-info/"
     )
     try:
@@ -90,7 +95,11 @@ def create_router_from_service(service: Service) -> APIRouter:
     Creates and return router from endpoints of service
     """
     nested_router = APIRouter()
-    host_port = f"http://{service.label}:{service.port}"
+    if settings.run_mode == "DEV":
+        service_host = service.ip
+    else:
+        service_host = service.label
+    host_port = f"http://{service_host}:{service.port}"
     for i, endp in enumerate(service.endpoints):  # type: ignore
         dependencies = []
         if endp.protected:

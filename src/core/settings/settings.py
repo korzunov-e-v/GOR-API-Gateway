@@ -9,8 +9,8 @@ from src.core.settings.uvicorn import UvicornSettings
 
 
 class RunMode(str, Enum):
-    background = "BACKGROUND"
     dev = "DEV"
+    prod = "PRODUCTION"
 
 
 class Settings(BaseSettings):
@@ -28,8 +28,8 @@ class Settings(BaseSettings):
     secret_jwt: str
     logging_level: str
 
-    # application run mod: DEV/BACKGROUND
-    run_mode: typing.Optional[RunMode] = RunMode.dev
+    # application run mod: DEV/PRODUCTION
+    run_mode: typing.Optional[RunMode] = RunMode.prod
 
     debug: typing.Optional[bool]
 
